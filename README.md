@@ -2,12 +2,13 @@
 Empirical Frequency Band Analysis (EBA) Algorithm described in "Empirical Frequency Band Analysis of Nonstationary Time Series" by Bruce, Tang, Hall, and Krafty (2019)
 Author: Scott A. Bruce
 
-Description: Instructions for implementing empirical band analysis
+## Description: 
+Instructions for implementing empirical band analysis
 using the FRESH statistic and procedure from "Empirical Frequency 
 Band Analysis of Nonstationary Time Series"
 by Bruce, Tang, Hall, and Krafty (2019)
 
-Dependencies: 
+## Dependencies: 
 Code was developed using R version 3.5.2 ("Eggshell Igloo"), so code
 may not function properly on older versions of R.  The packages listed
 in the demo file must also be installed prior to use: momentchi2, fields,
@@ -17,7 +18,7 @@ Code has been tested and developed for data of the following dimensions:
 <= 100000 time points (T), <= 20 tapers (K), <= 1000 observations per block (N).
 Larger datasets may require more RAM for processing. 
 
-Quick start guide:
+## Quick start guide:
 Follow the steps below to simulate data, run the search algorithm
 using the FRESH statisic, and create summary tables and plots of the results.
 Simulated data is according to the three settings in the paper: white noise (1 band),
