@@ -24,7 +24,7 @@ using the FRESH statisic, and create summary tables and plots of the results.
 Simulated data is according to the three settings in the paper: white noise (1 band),
 linear time-varying dynamics (3 bands), and sinusoidal time-varying dynamics (3 bands).
 
-1) Download the .zip file and extract the contents to a folder of your
+1) Download the two R files (EBA_demo.R and EBA_functions.R) into a folder of your 
 choosing. In what follows, we will assume the folder is saved with the
 following path 'C:\EBAdemo'.
 
@@ -37,20 +37,20 @@ statistic.
 3) Follow the instructions in the comments of the demo file to simulate
 data and apply the EBA search algorithm using the FRESH procedure. 
 
-Using EBA with the FRESH statistic and procedure on other data:
+## Using EBA with the FRESH statistic and procedure on other data:
 The following inputs are necessary to run the EBA with the FRESH statisic:
 
-'X' is a vector containing a realization of the time series process you wish
+'**X**' is a vector containing a realization of the time series process you wish
 to analyze. 
 
-'N' is a number representing how many observations should be contained in
+'**N**' is a number representing how many observations should be contained in
 each approximately stationary block for the estimation procedure of the local
 approximately stationary power spectrum.  For example, N=1000 means that the
 time series is broken up into approximately stationary segments each containing
 1000 observations.  Note that N must be significantly smaller than the total
 length of the time series.
 
-'K' is a number representing how many tapers to use in estimating the approximately
+'**K**' is a number representing how many tapers to use in estimating the approximately
 stationary local power spectrum using multitaper spectral estimation.  Note here that
 K must be significantly smaller than N in order to achieve reasonable frequency
 resolution.  For example, if you wish to distinguish behavior for frequencies separated
@@ -58,10 +58,10 @@ by 0.01 or larger (this is the bandwidth) and you had N=1000 observations in eac
 approximately stationary block, then you could have at most K=9 tapers.  More generally,
 using the sine tapers, bw=(K+1)/(N+1). 
 
-'std' is a binary indicator to determine if the variance in each stationary block
+'**std**' is a binary indicator to determine if the variance in each stationary block
 should be standardized to unit variance (std=TRUE) or not (std=FALSE).
 
-'alpha' is the significance level for testing each frequency partition.  For example,
+'**alpha**' is the significance level for testing each frequency partition.  For example,
 alpha=0.05 corresponds to the 5% significance level or 95% confidence level. 
 
 Once you have created these inputs, you can pass them into the 'eba.search' function 
