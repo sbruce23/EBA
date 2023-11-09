@@ -130,17 +130,18 @@ eba.b <- function(X.dm,f,startf,endf,covg,alpha) {
   
   if(is.na(pval.idx)){#if no rejections, set pval index to frequency with smallest p-value
     pval.idx <- which(pval.b==min(pval.b));
-    b.sig.ind <- 0;
+    b.sig.ind <- FALSE;
   } else {
-    b.sig.ind <- 1;
+    b.sig.ind <- TRUE;
   }
   
   bhat <- startf+pval.idx;
-  
+  names(pval.b) <- f[(startf + 1):endf]
   #output results for bhat
   out[c('bhat.idx','bhat','bhat.Q','bhat.pval','bhat.pval.th','bhat.sig')] <- c(bhat,f[bhat],Qb[pval.idx],
-                                                                                pval.b[pval.idx],pval.th[which(pval.ord==pval.b[pval.idx])],b.sig.ind);
-  return(out);
+                                                                                pval.b[pval.idx],pval.th[which(pval.ord==pval.b[pval.idx])],as.logical(b.sig.ind));
+  list.out <- list("out" = out, "pvals" = pval.b)
+  return(list.out);
   
 }
 
@@ -261,7 +262,13 @@ eba.search <- function(X,N,K,std,alpha){
       tmp <- eba.b(X.dm=X.ghat,f=X.mtspc$f,startf=f.part[idx]+bw,endf=f.part[idx+1]-bw,
                    covg=covg[(f.part[idx]+bw):(f.part[idx+1]-bw),(f.part[idx]+bw):(f.part[idx+1]-bw),],
                    alpha=alpha);
-      
+      if(idx == 1){
+        pvals <- tmp[[2]]
+      } else {
+        pvals <- c(pvals, tmp[[2]])
+      }
+      #print(tmp[[2]])
+      tmp <- tmp[[1]]
       #append run to log file
       out <- rbind(out,tmp);
       
@@ -291,9 +298,13 @@ eba.search <- function(X,N,K,std,alpha){
   
   test.flat <- eba.flat(f=X.mtspc$f,partfinal=X.mtspc$f[f.part],ghat=X.ghat,covg=covg);
   
+  r <- rev(pvals);
+  mm <- data.frame("Freq" = names(r), "Pvals" = unname(r));
+  mm <- mm[!duplicated(mm[,1]), ]
+  final_vals <- data.frame("Frequency" = as.numeric(rev(mm[,1])), "P-Values" = as.numeric(rev(mm[,2])))
   #compile results
   rownames(out) <- 1:nrow(out);
-  results <- list(part.final=X.mtspc$f[f.part],part.list=partlst,log=out,mtspec=X.mtspc,flat=test.flat);
+  results <- list(part.final=X.mtspc$f[f.part],part.list=partlst,log=out,mtspec=X.mtspc,flat=test.flat, pvals = final_vals);
   return(results)
 }
 
@@ -360,7 +371,7 @@ eba.simdata <- function(T){
   #combine
   coef1 <- sqrt(4)*sin(5*pi*seq(0,1,length=T));
   coef2 <- sqrt(4)*cos(5*pi*seq(0,1,length=T));
-  coef3 <- sqrt(9)*cos(5*pi*seq(0,1,length=T)); 
+  coef3 <- sqrt(32)*cos(5*pi*seq(0,1,length=T)); 
   X.3bS <- coef1*wn1.new*sqrt(.3) + coef2*wn2.new*sqrt(.4) + coef3*wn3.new*sqrt(.3)+rnorm(T,0,1);
   
   return(list(wn=X.wn,bL=X.3bL,bS=X.3bS));
