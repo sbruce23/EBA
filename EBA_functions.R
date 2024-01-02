@@ -109,7 +109,7 @@ eba.b <- function(X.dm,f,startf,endf,covg,alpha) {
   #clusterExport(c1, c('sw','sigma2','Qb'), envir=environment())
   pval.b <- sapply(X=1:length(Qb),FUN=function(x) 1-sw(sigma2[,x],Qb[x]));
   #x11();plot(f[(startf+1):endf],pval.b,type="l",xlab="Hz",ylab="p-value",mgp=c(3,1,0));
-  
+  names(pval.b) <- f[(startf + 1):endf]
   #Hochberg step up procedure for determining significance
   pval.ord <- sort(pval.b);
   pval.th <- alpha/((endf-startf)-(1:(endf-startf))+1);
@@ -136,10 +136,10 @@ eba.b <- function(X.dm,f,startf,endf,covg,alpha) {
   }
   
   bhat <- startf+pval.idx;
-  names(pval.b) <- f[(startf + 1):endf]
+  
   #output results for bhat
   out[c('bhat.idx','bhat','bhat.Q','bhat.pval','bhat.pval.th','bhat.sig')] <- c(bhat,f[bhat],Qb[pval.idx],
-                                                                                pval.b[pval.idx],pval.th[which(pval.ord==pval.b[pval.idx])],as.logical(b.sig.ind));
+                                                                                pval.b[pval.idx],pval.th[which(pval.ord==pval.b[pval.idx])[1]],as.logical(b.sig.ind));
   list.out <- list("out" = out, "pvals" = pval.b)
   return(list.out);
   
@@ -262,12 +262,13 @@ eba.search <- function(X,N,K,std,alpha){
       tmp <- eba.b(X.dm=X.ghat,f=X.mtspc$f,startf=f.part[idx]+bw,endf=f.part[idx+1]-bw,
                    covg=covg[(f.part[idx]+bw):(f.part[idx+1]-bw),(f.part[idx]+bw):(f.part[idx+1]-bw),],
                    alpha=alpha);
+      # Saves the p-values at each frequency for each iteration
       if(idx == 1){
         pvals <- tmp[[2]]
       } else {
         pvals <- c(pvals, tmp[[2]])
       }
-      #print(tmp[[2]])
+      
       tmp <- tmp[[1]]
       #append run to log file
       out <- rbind(out,tmp);
@@ -298,10 +299,17 @@ eba.search <- function(X,N,K,std,alpha){
   
   test.flat <- eba.flat(f=X.mtspc$f,partfinal=X.mtspc$f[f.part],ghat=X.ghat,covg=covg);
   
-  r <- rev(pvals);
+  # Saves only the last p-value seen at each frequency across iterations, and then formats the resuls
+  
+  ### ex.) Iterations 1,2 and 3 had a p-value for the frequency of 0.3 -> Only the p-value from the 3rd iteration is saved
+  ### ex.) Iterations 1 and 2 had a p-value for the frequency of 0.15 -> Only the p-value from the 2rd iteration is saved
+  ### ex.) Only iteration 1 had a p-value for the frequency of 0.075 -> Only the p-value from the 1st iteration is saved
+  
+  r <- rev(pvals); # Ensures we look at the last completed iteration first
   mm <- data.frame("Freq" = names(r), "Pvals" = unname(r));
-  mm <- mm[!duplicated(mm[,1]), ]
+  mm <- mm[!duplicated(mm[,1]), ] # Ensures no duplicate frequencies are in the below dataframe
   final_vals <- data.frame("Frequency" = as.numeric(rev(mm[,1])), "P-Values" = as.numeric(rev(mm[,2])))
+  
   #compile results
   rownames(out) <- 1:nrow(out);
   results <- list(part.final=X.mtspc$f[f.part],part.list=partlst,log=out,mtspec=X.mtspc,flat=test.flat, pvals = final_vals);
@@ -377,5 +385,4 @@ eba.simdata <- function(T){
   return(list(wn=X.wn,bL=X.3bL,bS=X.3bS));
   
 }
-
 
